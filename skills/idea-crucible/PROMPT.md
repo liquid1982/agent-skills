@@ -74,6 +74,8 @@ Use these top-level sections, in this order:
 
 Length should follow the material: a paragraph-sized idea earns a page or two; a full proposal earns proportionally more. Never pad.
 
+(When this protocol runs inside an agent that can write files, the evaluation is additionally rendered as a presentation-grade HTML report — see the sibling `REPORT.md` and `TEMPLATE.html`. The analysis above is always completed first; the report is a rendering of it, not a replacement.)
+
 ---
 
 **The idea to evaluate:**

@@ -1,6 +1,6 @@
 ---
 name: idea-crucible
-description: "Put an idea or proposal through a three-pass evaluation — fierce critique, genuine steelman, honest verdict with a commit-to-one recommendation. Input can be a document, a set of files, or a pasted paragraph. Trigger: '/idea-crucible', 'critique this idea', 'stress-test this proposal', 'steelman and critique', or any ask to evaluate whether an idea deserves attention or budget."
+description: "Put an idea or proposal through a three-pass evaluation — fierce critique, genuine steelman, honest verdict with a commit-to-one recommendation — delivered as a self-contained, presentation-grade HTML report fit for board meetings. Input can be a document, a set of files, or a pasted paragraph. Trigger: '/idea-crucible', 'critique this idea', 'stress-test this proposal', 'steelman and critique', or any ask to evaluate whether an idea deserves attention or budget."
 ---
 
 # /idea-crucible — three-pass idea evaluation
@@ -25,9 +25,9 @@ Evaluate an idea using the protocol in [PROMPT.md](PROMPT.md) (same directory as
 
 2. **Run the protocol.** Follow PROMPT.md's three passes and ground rules. For substantial doc sets, anchor findings with `file:line` references so they're easy to jump to.
 
-3. **Deliver.**
-   - Default: output the evaluation directly in the conversation, in PROMPT.md's four-section format.
-   - If the user asked for a file (or the input was a doc set under review, where a sibling artifact is the convention): write `<input-dir>/crucible-verdict.md` and summarize the verdict + recommendation in the conversation.
+3. **Render the report.** The default deliverable is a self-contained, presentation-grade HTML file — follow [REPORT.md](REPORT.md) (rules + checklist) and fill [TEMPLATE.html](TEMPLATE.html); write `<kebab-slug-of-idea>-crucible.html` next to the source material (or in the working directory for pasted text). Run REPORT.md's pre-delivery checklist before handing it over.
+
+4. **Deliver.** Give the file path plus a short conversational summary: the recommendation, confidence, and the top findings. Skip the HTML file only if the user explicitly asks for a conversation-only answer (then use PROMPT.md's four-section format inline).
 
 ## Rules
 

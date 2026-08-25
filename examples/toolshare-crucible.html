@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<!--
+  IDEA CRUCIBLE — worked example report.
+  The evaluated "ToolShare" proposal is FICTIONAL, written to demonstrate the skill's
+  output quality. Generated from skills/idea-crucible/TEMPLATE.html per REPORT.md.
+  Self-contained: no external resources; renders from file:// and prints cleanly.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ToolShare — Idea Crucible Evaluation</title>
+<style>
+  /* ============ tokens ============ */
+  :root {
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --ink-3: #898781;
+    --hairline: #e1e0d9;
+    --ring: rgba(11, 11, 11, 0.10);
+    --fatal: #d03b3b;
+    --serious: #ec835a;
+    --friction: #898781;
+    --good: #0ca30c;
+    --good-text: #006300;
+    --caution: #fab219;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  /* ============ base ============ */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { color-scheme: light; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font: 17px/1.65 var(--serif);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 76px 32px 64px; }
+  p + p { margin-top: 0.9em; }
+  a { color: inherit; text-decoration-color: var(--hairline); text-underline-offset: 3px; }
+  strong { font-weight: 650; }
+
+  .eyebrow {
+    font: 600 11px/1 var(--sans);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* ============ masthead ============ */
+  header h1 {
+    font: 700 clamp(34px, 5vw, 46px)/1.08 var(--sans);
+    letter-spacing: -0.02em;
+    margin: 14px 0 10px;
+    text-wrap: balance;
+  }
+  .subtitle { font: 400 18px/1.5 var(--serif); color: var(--ink-2); max-width: 60ch; }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px 24px;
+    margin: 30px 0 0;
+    padding: 16px 0;
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    font-family: var(--sans);
+  }
+  .meta dt { font: 600 10.5px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+  .meta dd { font-size: 13.5px; line-height: 1.45; color: var(--ink); }
+
+  /* ============ verdict banner ============ */
+  .banner {
+    margin-top: 36px;
+    background: color-mix(in srgb, var(--verdict) 7%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--verdict) 38%, transparent);
+    border-radius: 14px;
+    padding: 28px 30px 26px;
+  }
+  .banner .word {
+    font: 700 30px/1.1 var(--sans);
+    letter-spacing: -0.015em;
+    margin: 10px 0 8px;
+  }
+  .banner .why { font-size: 16.5px; color: var(--ink-2); max-width: 62ch; }
+  .scale { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .chip {
+    font: 600 10.5px/1 var(--sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 7px 12px;
+    background: var(--surface);
+  }
+  .chip.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .chip.active::before { content: "●"; color: var(--verdict); margin-right: 7px; font-size: 9px; }
+  .confidence { margin-top: 16px; font: 500 13px/1.5 var(--sans); color: var(--ink-2); }
+  .confidence b { font-weight: 650; color: var(--ink); }
+
+  /* ============ stat tiles ============ */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--ring);
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+  }
+  .tile .label { font: 600 10.5px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); display: flex; align-items: center; gap: 6px; }
+  .tile .value { font: 600 30px/1.15 var(--sans); margin-top: 8px; }
+  .tile .note { font: 400 12px/1.4 var(--sans); color: var(--ink-3); margin-top: 2px; }
+  .mark { font-size: 10px; line-height: 1; }
+  .mark.fatal { color: var(--fatal); }
+  .mark.serious { color: var(--serious); }
+  .mark.friction { color: var(--friction); }
+
+  /* ============ sections ============ */
+  section { margin-top: 72px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--hairline); margin-bottom: 26px; }
+  .sec-num { font: 600 13px/1 var(--sans); color: var(--ink-3); letter-spacing: 0.06em; }
+  h2 { font: 700 23px/1.2 var(--sans); letter-spacing: -0.015em; }
+  .sec-sub { margin-left: auto; font: 500 11px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+  h3 { font: 650 16.5px/1.35 var(--sans); letter-spacing: -0.005em; }
+  section > p, section > .prose p { max-width: 68ch; }
+  .lede { font-size: 18px; }
+
+  .box {
+    background: var(--surface);
+    border: 1px solid var(--ring);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 18px 0;
+    font-size: 15.5px;
+  }
+  .box .eyebrow { display: block; margin-bottom: 10px; }
+  .box ul { margin-left: 18px; }
+  .box li + li { margin-top: 6px; }
+
+  /* ============ findings ============ */
+  .finding {
+    background: var(--surface);
+    border: 1px solid var(--ring);
+    border-left: 3px solid var(--sev, var(--hairline));
+    border-radius: 10px;
+    padding: 20px 24px 18px;
+    margin: 14px 0;
+    break-inside: avoid;
+  }
+  .finding.fatal    { --sev: var(--fatal); }
+  .finding.serious  { --sev: var(--serious); }
+  .finding.friction { --sev: var(--friction); }
+  .f-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-family: var(--sans); }
+  .fid { font: 700 12px/1 var(--sans); color: var(--ink-3); letter-spacing: 0.04em; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 700 10px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase;
+    border-radius: 999px; padding: 5px 10px;
+    background: color-mix(in srgb, var(--sev) 11%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--sev) 45%, transparent);
+    color: var(--ink);
+  }
+  .finding.fatal .tag { background: var(--fatal); border-color: var(--fatal); color: #fff; }
+  .finding.fatal .tag .mark { color: #fff; }
+  .finding h3 { margin-bottom: 8px; }
+  .finding p { font-size: 15.5px; max-width: 66ch; }
+  .anchor {
+    margin-top: 12px; padding-left: 14px;
+    border-left: 2px solid var(--hairline);
+    font-size: 14.5px; font-style: italic; color: var(--ink-2);
+    max-width: 62ch;
+  }
+  .anchor .src { display: block; margin-top: 5px; font: 400 11.5px/1 var(--mono); font-style: normal; color: var(--ink-3); }
+
+  /* ============ steelman ============ */
+  .re { font: 700 12px/1 var(--sans); color: var(--ink-3); letter-spacing: 0.04em; margin-right: 6px; }
+  .repair {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 700 10px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase;
+    border-radius: 999px; padding: 5px 10px; vertical-align: 1px;
+    background: color-mix(in srgb, var(--caution) 16%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--caution) 55%, transparent);
+    color: var(--ink);
+  }
+  .kernel { border-left-color: var(--good); }
+  .kernel .eyebrow { color: var(--good-text); }
+
+  /* ============ verdict section ============ */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--ring);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    break-inside: avoid;
+  }
+  .callout .eyebrow { display: block; margin-bottom: 10px; }
+  .callout p, .callout li { font-size: 15.5px; }
+  .callout ul, .callout ol { margin-left: 18px; }
+  .callout li + li { margin-top: 8px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-family: var(--sans); break-inside: avoid; }
+  th { font: 600 10.5px/1.3 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); text-align: left; padding: 0 14px 9px 0; border-bottom: 1px solid var(--hairline); }
+  td { font-size: 14px; line-height: 1.55; padding: 11px 14px 11px 0; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  td:first-child { white-space: nowrap; font-weight: 650; }
+
+  /* ============ footer ============ */
+  footer { margin-top: 80px; padding-top: 18px; border-top: 1px solid var(--hairline); font: 400 12.5px/1.7 var(--sans); color: var(--ink-3); }
+
+  /* ============ print ============ */
+  @page { margin: 16mm; }
+  @media print {
+    body { background: #fff; font-size: 12.5pt; }
+    .wrap { max-width: none; padding: 0; }
+    .banner, .tile, .finding, .callout, .box { break-inside: avoid; }
+    section { margin-top: 44px; }
+    a { text-decoration: none; }
+  }
+  @media (max-width: 640px) {
+    .meta, .stats { grid-template-columns: repeat(2, 1fr); }
+    .wrap { padding: 44px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= MASTHEAD ================= -->
+  <header>
+    <span class="eyebrow">Idea Crucible · Evaluation Report</span>
+    <h1>ToolShare</h1>
+    <p class="subtitle">A $29/month subscription lending library for power tools in dense cities, fulfilled through smart lockers in residential buildings and partner hardware stores.</p>
+    <dl class="meta">
+      <div><dt>Date</dt><dd>25 August 2026</dd></div>
+      <div><dt>Evaluator</dt><dd>Idea Crucible protocol, run by Claude</dd></div>
+      <div><dt>Source material</dt><dd>ToolShare proposal v2 (fictional sample, 9 pp.)</dd></div>
+      <div><dt>Method</dt><dd>Three-pass adversarial protocol (critique · steelman · verdict)</dd></div>
+    </dl>
+  </header>
+
+  <!-- ================= VERDICT BANNER ================= -->
+  <div class="banner" style="--verdict: var(--caution);">
+    <span class="eyebrow">Recommendation</span>
+    <div class="word">Test first</div>
+    <p class="why">The demand thesis is plausible but the flat-subscription economics fail on the proposal's own numbers — a 90-day manual-operations pilot with hybrid pricing settles both questions for under 3% of the requested budget.</p>
+    <div class="scale">
+      <span class="chip">Pursue</span>
+      <span class="chip">Pursue with changes</span>
+      <span class="chip active">Test first</span>
+      <span class="chip">Park</span>
+      <span class="chip">Kill</span>
+    </div>
+    <p class="confidence"><b>Confidence: Medium.</b> A pilot converting ≥25% of the waitlist with ≥40% repeat borrowing would move this to Pursue with changes; conversion under 15% or an uninsurable tool category kills it.</p>
+  </div>
+
+  <div class="stats">
+    <div class="tile"><span class="label"><span class="mark fatal">▮</span> Fatal findings</span><div class="value">1</div><div class="note">fails regardless of execution</div></div>
+    <div class="tile"><span class="label"><span class="mark serious">▲</span> Serious findings</span><div class="value">3</div><div class="note">needs an answer first</div></div>
+    <div class="tile"><span class="label"><span class="mark friction">●</span> Friction findings</span><div class="value">2</div><div class="note">raises cost, not the verdict</div></div>
+    <div class="tile"><span class="label">Open questions</span><div class="value">4</div><div class="note">ranked by verdict impact</div></div>
+  </div>
+
+  <!-- ================= 01 · THE IDEA ================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>The idea as I understand it</h2></div>
+    <p class="lede">ToolShare proposes a membership service: for $29 a month, city residents borrow power tools and equipment from a shared inventory, picked up and returned through smart lockers installed in apartment buildings and partner hardware stores. The promised outcome is Netflix-style recurring revenue on an asset class people own but rarely use — the proposal cites a drill being used "13 minutes over its lifetime." It implicitly assumes that borrowing demand is frequent and steady enough to justify a flat monthly fee, that members will tolerate locker logistics over ownership or big-box rental, and that lending high-powered tools to untrained strangers is an insurable activity.</p>
+  </section>
+
+  <!-- ================= 02 · CRITIQUE ================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>Critique</h2><span class="sec-sub">Pass 1 · Adversarial</span></div>
+    <p>The strongest single objection: <strong>on the proposal's own projections, every active member loses money before depreciation is counted.</strong> Everything else is secondary to that arithmetic.</p>
+
+    <article class="finding fatal">
+      <div class="f-head"><span class="fid">F1</span><span class="tag"><span class="mark">▮</span>Fatal</span></div>
+      <h3>The unit economics fail on the proposal's own numbers</h3>
+      <p>The proposal projects 2.3 borrows per active member per month and separately estimates $14 fulfillment cost per borrow (locker amortization, transport, cleaning, restocking). That is $32.20 of direct cost against $29 of revenue — negative contribution margin before tool depreciation, insurance, or any overhead. No page of the proposal multiplies these two numbers together. A business that loses money on each engaged customer cannot be fixed by growth; heavier usage makes it worse.</p>
+      <div class="anchor">“We project 2.3 borrows per active member per month” · “fully-loaded fulfillment cost of ~$14 per borrow”<span class="src">proposal v2 · §4 Financial model, p.6 · §5 Operations, p.7</span></div>
+    </article>
+
+    <article class="finding serious">
+      <div class="f-head"><span class="fid">F2</span><span class="tag"><span class="mark serious">▲</span>Serious</span></div>
+      <h3>DIY demand is episodic, but the model needs it to be steady</h3>
+      <p>Home projects cluster: a move, a renovation, a broken fence. A member who mounts a TV and builds a shelf in month one may not touch a tool for a year — yet the subscription model prices for continuous engagement. The proposal presents no cohort or survey data on borrowing frequency over time; the 2.3/month figure is asserted, not sourced. The likely shape is a burst of use, then churn — which turns the recurring-revenue story into a one-time-project business wearing a subscription costume.</p>
+      <div class="anchor">“Members will build ToolShare into their monthly routine, like a gym.”<span class="src">proposal v2 · §3 Market, p.4</span></div>
+    </article>
+
+    <article class="finding serious">
+      <div class="f-head"><span class="fid">F3</span><span class="tag"><span class="mark serious">▲</span>Serious</span></div>
+      <h3>Liability and insurability are unaddressed</h3>
+      <p>The service hands table saws, angle grinders, and nail guns to unverified, untrained users through an unstaffed locker. The proposal's entire treatment of this is one line about waivers. Waiver enforceability against gross-negligence claims varies by jurisdiction; commercial insurers price shared power-tool lending harshly if they quote it at all; and one severed finger with press coverage could end the company. No insurance quote, no tool-category risk tiering, no incident protocol appears anywhere in the nine pages.</p>
+      <div class="anchor">“Members accept a standard liability waiver at signup.”<span class="src">proposal v2 · §5 Operations, p.8 (sole mention)</span></div>
+    </article>
+
+    <article class="finding serious">
+      <div class="f-head"><span class="fid">F4</span><span class="tag"><span class="mark serious">▲</span>Serious</span></div>
+      <h3>The incumbent alternative is never priced against</h3>
+      <p>Home Depot rents a drill for ~$20/day with staff advice and no membership; Harbor Freight sells one outright for $30; many buildings already run informal tool-sharing. The proposal names no competitor and performs no price or convenience comparison. For the occasional user (the majority, per F2), a once-a-year rental or a cheap purchase dominates a standing $29/month commitment. The idea must beat these alternatives, not omit them.</p>
+      <div class="anchor">The proposal's competitive landscape section lists only “other sharing-economy startups” — no rental incumbents, no ownership baseline.<span class="src">proposal v2 · §3 Market, p.5</span></div>
+    </article>
+
+    <article class="finding friction">
+      <div class="f-head"><span class="fid">F5</span><span class="tag"><span class="mark friction">●</span>Friction</span></div>
+      <h3>Locker form factor excludes the highest-value inventory</h3>
+      <p>Parcel-sized smart lockers hold drills and sanders, but the tools people most rationally borrow rather than own — mitre saws, tile cutters, pressure washers, ladders — don't fit. Serving them means staffed points or oversized lockers, both of which raise the $14 fulfillment cost that F1 already shows to be unsustainable. Survivable, but it narrows the catalog exactly where borrowing beats owning.</p>
+      <div class="anchor">“Standard 3-tier locker units, 40×40×60cm max compartment”<span class="src">proposal v2 · §5 Operations, p.7</span></div>
+    </article>
+
+    <article class="finding friction">
+      <div class="f-head"><span class="fid">F6</span><span class="tag"><span class="mark friction">●</span>Friction</span></div>
+      <h3>Turnaround time halves effective inventory at peak</h3>
+      <p>Every return needs inspection, cleaning, battery charging, and consumable replacement before relisting. The proposal models inventory as continuously available, but weekend demand peaks combined with a 24–48h refurbishment cycle mean the effective fleet on a Saturday morning is a fraction of the nominal one — either stockouts (churn fuel for F2) or a larger, costlier fleet.</p>
+      <div class="anchor">Availability model assumes “same-day relisting” with no refurbishment step costed.<span class="src">proposal v2 · §4 Financial model, p.6</span></div>
+    </article>
+  </section>
+
+  <!-- ================= 03 · STEELMAN ================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>Steelman</h2><span class="sec-sub">Pass 2 · Strongest case</span></div>
+    <div class="prose">
+      <h3>Why this, why now</h3>
+      <p>The underlying observation is genuinely strong: power tools are among the worst-utilized assets a household owns, urban apartments keep shrinking (nowhere to store a mitre saw), and the sustainability tailwind — right-to-repair laws, circular-economy grants, ESG-driven building amenities — is real and growing. Smart-locker hardware costs have fallen by an order of magnitude in a decade, and property managers actively shop for amenities that differentiate buildings at near-zero effort to themselves. The ingredients for a shared-tools layer in dense cities exist now in a way they did not in the 2010s sharing-economy wave.</p>
+
+      <h3 style="margin-top:24px">What it looks like when it works</h3>
+      <p>The winning shape is a dense single corridor where one van, one technician, and one micro-warehouse serve fifty buildings. The buyer is the property manager, not the resident: ToolShare as a building amenity, paid B2B2C the way bike rooms and package lockers are, with residents borrowing at low or no marginal cost. At corridor density, fulfillment cost per borrow collapses, the locker network is subsidized by buildings competing on amenities, and the company owns a defensible local logistics asset that adjacent categories (party equipment, sports gear, cleaning machines) can ride on.</p>
+
+      <h3 style="margin-top:24px">Answers to the critique</h3>
+      <p><span class="re">Re F1 —</span>The arithmetic stands, but it indicts the pricing model, not the service. <span class="repair">Repair</span> A hybrid model — low base fee ($9) plus per-borrow charge ($8) plus refundable deposit — turns each borrow contribution-positive at the proposal's own $14 cost once corridor density trims transport, and aligns revenue with the episodic usage F2 describes rather than fighting it.</p>
+      <p><span class="re">Re F2 —</span>Episodic demand is fatal to flat consumer pricing but harmless to the amenity model: buildings pay for availability, not frequency, exactly as they do for gyms residents rarely use. <span class="repair">Repair</span> Reposition the primary customer as the building; resident subscriptions become an upsell, not the foundation.</p>
+      <p><span class="re">Re F3 —</span>Partially answerable: launch with a curated low-risk catalog (drills, sanders, levels, wet vacs — no blades, no ladders), which is the insurable core of demand anyway; equipment-rental insurance for that tier is routine. The full-catalog liability question remains open and must be priced before scale — this is a genuine gap, not a rebuttal.</p>
+      <p><span class="re">Re F4 —</span>The incumbent comparison, once actually made, is less lopsided than it looks: a big-box rental is a half-day errand with a truck; ToolShare is a lobby pickup. Convenience premiums of this kind demonstrably sustain services (meal kits, package lockers) against cheaper alternatives — though the premium's size is exactly what the pilot must measure, and price parity should be conceded, not claimed.</p>
+    </div>
+    <article class="finding kernel" style="margin-top:24px">
+      <span class="eyebrow">The kernel worth keeping</span>
+      <p style="margin-top:8px"><strong>Project kits.</strong> Buried on page 8: curated bundles — every tool and consumable for one job ("mount a TV", "refinish a table", "childproof an apartment"), borrowed as a unit with a how-to card. No incumbent offers this; it matches the true episodic shape of demand; it commands per-project pricing that sidesteps F1 entirely. This survives even if every other element of the proposal is discarded.</p>
+    </article>
+  </section>
+
+  <!-- ================= 04 · VERDICT ================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Honest verdict</h2><span class="sec-sub">Pass 3 · Position taken</span></div>
+    <p class="lede">The critique wins on the business model: F1 is conceded even by the steelman, whose repair — hybrid pricing sold through buildings — is a materially different company than the one proposed, and should be judged as such. The steelman wins on the existence of demand and the direction of the tailwinds, but its case rests on corridor density and B2B2C economics that are asserted, not evidenced. That combination — plausible demand, broken pricing, checkable assumptions — is precisely what a cheap pilot is for.</p>
+
+    <div class="callout"><span class="eyebrow">Deserves attention</span><ul>
+      <li>The <strong>project-kit</strong> concept — the one genuinely differentiated element, and the natural pilot product.</li>
+      <li>The <strong>property-manager channel</strong> — if buildings will pay for availability, the episodic-demand problem dissolves.</li>
+      <li><strong>Hybrid per-borrow pricing</strong> — the only pricing shape under which the stated costs close.</li>
+    </ul></div>
+    <div class="callout"><span class="eyebrow">Does not</span><ul>
+      <li>The $29 flat consumer subscription — arithmetically dead on the proposal's own figures (F1).</li>
+      <li>Proprietary locker hardware and the custom app — capex and 9 of the proposal's 24 roadmap weeks spent before the demand question is answered.</li>
+      <li>The city-wide launch plan — density economics must be proven in one corridor before a second exists.</li>
+    </ul></div>
+    <div class="callout"><span class="eyebrow">The risks that matter</span><ul>
+      <li><strong>Insurability</strong> (F3): if the lendable catalog shrinks to what insurers accept, is the remaining catalog worth borrowing? This can kill the company independent of demand.</li>
+      <li><strong>Demand shape</strong> (F2/F4): if borrowing is annual rather than monthly and big-box rental is good enough, no pricing model saves it.</li>
+      <li><strong>Fulfillment cost reality</strong> (F1/F6): $14/borrow is an estimate; refurbishment and stockout dynamics push it up, and the model has no cushion.</li>
+    </ul></div>
+    <div class="callout"><span class="eyebrow">Realism check</span><p>As written — $29 flat, custom lockers, city-wide in 24 weeks — the promise is not achievable: the model loses money per engaged member and the timeline funds infrastructure before evidence. The honest version of this idea is a <strong>per-project tool service with a membership discount, sold building-by-building</strong>, which is smaller, slower, and possibly still good.</p></div>
+
+    <div class="banner" style="--verdict: var(--caution); margin-top:28px">
+      <span class="eyebrow">Recommendation — restated</span>
+      <div class="word" style="font-size:24px">Test first</div>
+      <p class="why">Run a 90-day, single-neighborhood pilot with deliberately manual operations: one storefront corner or building room instead of lockers, a spreadsheet instead of an app, a curated low-risk catalog plus three project kits, hybrid pricing ($9 base + $8/borrow + deposit), and a 200-person waitlist recruited through two partner buildings. The pilot is decisive if it measures waitlist→paid conversion, 60-day repeat-borrow rate, true cost per borrow, and whether an insurer will quote the catalog. Total exposure is under 3% of the proposal's requested raise.</p>
+    </div>
+
+    <h3 style="margin-top:32px">Tripwires — what would flip this call</h3>
+    <table>
+      <thead><tr><th>ID</th><th>Signal</th><th>Flips the call to</th></tr></thead>
+      <tbody>
+        <tr><td>T1</td><td>Pilot converts ≥25% of waitlist AND ≥40% borrow again within 60 days, at positive contribution per borrow</td><td>Pursue with changes (amenity model, hybrid pricing)</td></tr>
+        <tr><td>T2</td><td>Conversion under 15%, or repeat rate under 20%</td><td>Kill</td></tr>
+        <tr><td>T3</td><td>No insurer quotes the curated catalog at ≤$4 per borrow equivalent</td><td>Kill (or Park pending a hand-tools-only reframe)</td></tr>
+        <tr><td>T4</td><td>≥3 property managers sign paid amenity LOIs during the pilot</td><td>Strengthens Pursue with changes regardless of consumer conversion</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:32px">Open questions for the author</h3>
+    <table>
+      <thead><tr><th>#</th><th>Question</th><th>Why it moves the verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>Is the $14 fulfillment cost measured from any real operation, or modeled? Show the build-up.</td><td>F1 is the fatal finding; if true cost is materially lower, the flat model may only be Serious, not Fatal.</td></tr>
+        <tr><td>Q2</td><td>Has any insurer been approached? What did they say?</td><td>T3 is a kill condition that one phone call could resolve before the pilot.</td></tr>
+        <tr><td>Q3</td><td>Where does 2.3 borrows/member/month come from? Any survey, waitlist, or analog-market cohort data?</td><td>Demand shape (F2) decides between subscription and per-project pricing.</td></tr>
+        <tr><td>Q4</td><td>What do the two named partner buildings actually commit to — space, promotion, payment?</td><td>The amenity channel is the steelman's strongest repair; an LOI would substantiate it.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Prepared with the <strong>Idea Crucible</strong> three-pass protocol — fierce critique, genuine steelman, honest verdict.
+    Findings are anchored to the source material cited above; severity is marked by word and shape, never color alone.
+    The evaluated ToolShare proposal is a <strong>fictional sample</strong> written to demonstrate this report format.
+    · <a href="https://github.com/liquid1982/agent-skills">liquid1982/agent-skills</a>
+  </footer>
+
+</div>
+</body>
+</html>

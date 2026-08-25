@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<!--
+  IDEA CRUCIBLE — report template.
+  Self-contained: no external resources (no webfonts, no CDNs, no scripts, no images).
+  Hyperlinks out are allowed; fetched resources are not. Must render perfectly from file://
+  and print cleanly to PDF. See REPORT.md for the rules that govern filling this in.
+  Placeholders are {{LIKE_THIS}}. Blocks marked "repeat" are duplicated per item.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{IDEA_TITLE}} — Idea Crucible Evaluation</title>
+<style>
+  /* ============ tokens ============ */
+  :root {
+    --page: #f9f9f7;          /* page plane */
+    --surface: #fcfcfb;       /* cards, banner */
+    --ink: #0b0b0b;           /* primary text */
+    --ink-2: #52514e;         /* secondary text */
+    --ink-3: #898781;         /* muted labels */
+    --hairline: #e1e0d9;
+    --ring: rgba(11, 11, 11, 0.10);
+    --fatal: #d03b3b;         /* status: critical */
+    --serious: #ec835a;       /* status: serious */
+    --friction: #898781;      /* neutral — friction is survivable, not a warning */
+    --good: #0ca30c;          /* status: good */
+    --good-text: #006300;     /* success text on light */
+    --caution: #fab219;       /* status: warning */
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  /* ============ base ============ */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { color-scheme: light; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font: 17px/1.65 var(--serif);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 76px 32px 64px; }
+  p + p { margin-top: 0.9em; }
+  a { color: inherit; text-decoration-color: var(--hairline); text-underline-offset: 3px; }
+  strong { font-weight: 650; }
+
+  .eyebrow {
+    font: 600 11px/1 var(--sans);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* ============ masthead ============ */
+  header h1 {
+    font: 700 clamp(34px, 5vw, 46px)/1.08 var(--sans);
+    letter-spacing: -0.02em;
+    margin: 14px 0 10px;
+    text-wrap: balance;
+  }
+  .subtitle { font: 400 18px/1.5 var(--serif); color: var(--ink-2); max-width: 60ch; }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px 24px;
+    margin: 30px 0 0;
+    padding: 16px 0;
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    font-family: var(--sans);
+  }
+  .meta dt { font: 600 10.5px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+  .meta dd { font-size: 13.5px; line-height: 1.45; color: var(--ink); }
+
+  /* ============ verdict banner ============ */
+  /* Set --verdict on .banner to the status color of the recommendation:
+     PURSUE → var(--good) · PURSUE WITH CHANGES → var(--good) · TEST FIRST → var(--caution)
+     PARK → var(--friction) · KILL → var(--fatal)                                          */
+  .banner {
+    margin-top: 36px;
+    background: color-mix(in srgb, var(--verdict) 7%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--verdict) 38%, transparent);
+    border-radius: 14px;
+    padding: 28px 30px 26px;
+  }
+  .banner .word {
+    font: 700 30px/1.1 var(--sans);
+    letter-spacing: -0.015em;
+    margin: 10px 0 8px;
+  }
+  .banner .why { font-size: 16.5px; color: var(--ink-2); max-width: 62ch; }
+  .scale { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .chip {
+    font: 600 10.5px/1 var(--sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 7px 12px;
+    background: var(--surface);
+  }
+  .chip.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .chip.active::before { content: "●"; color: var(--verdict); margin-right: 7px; font-size: 9px; }
+  .confidence { margin-top: 16px; font: 500 13px/1.5 var(--sans); color: var(--ink-2); }
+  .confidence b { font-weight: 650; color: var(--ink); }
+
+  /* ============ stat tiles ============ */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--ring);
+    border-radius: 12px;
+    padding: 16px 18px 14px;
+  }
+  .tile .label { font: 600 10.5px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); display: flex; align-items: center; gap: 6px; }
+  .tile .value { font: 600 30px/1.15 var(--sans); margin-top: 8px; }  /* proportional figures; ink, never status-colored */
+  .tile .note { font: 400 12px/1.4 var(--sans); color: var(--ink-3); margin-top: 2px; }
+  .mark { font-size: 10px; line-height: 1; }
+  .mark.fatal { color: var(--fatal); }
+  .mark.serious { color: var(--serious); }
+  .mark.friction { color: var(--friction); }
+
+  /* ============ sections ============ */
+  section { margin-top: 72px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--hairline); margin-bottom: 26px; }
+  .sec-num { font: 600 13px/1 var(--sans); color: var(--ink-3); letter-spacing: 0.06em; }
+  h2 { font: 700 23px/1.2 var(--sans); letter-spacing: -0.015em; }
+  .sec-sub { margin-left: auto; font: 500 11px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+  h3 { font: 650 16.5px/1.35 var(--sans); letter-spacing: -0.005em; }
+  section > p, section > .prose p { max-width: 68ch; }
+  .lede { font-size: 18px; }
+
+  /* assumptions / context box */
+  .box {
+    background: var(--surface);
+    border: 1px solid var(--ring);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 18px 0;
+    font-size: 15.5px;
+  }
+  .box .eyebrow { display: block; margin-bottom: 10px; }
+  .box ul { margin-left: 18px; }
+  .box li + li { margin-top: 6px; }
+
+  /* ============ findings ============ */
+  .finding {
+    background: var(--surface);
+    border: 1px solid var(--ring);
+    border-left: 3px solid var(--sev, var(--hairline));
+    border-radius: 10px;
+    padding: 20px 24px 18px;
+    margin: 14px 0;
+    break-inside: avoid;
+  }
+  .finding.fatal    { --sev: var(--fatal); }
+  .finding.serious  { --sev: var(--serious); }
+  .finding.friction { --sev: var(--friction); }
+  .f-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-family: var(--sans); }
+  .fid { font: 700 12px/1 var(--sans); color: var(--ink-3); letter-spacing: 0.04em; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 700 10px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase;
+    border-radius: 999px; padding: 5px 10px;
+    background: color-mix(in srgb, var(--sev) 11%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--sev) 45%, transparent);
+    color: var(--ink);
+  }
+  .finding.fatal .tag { background: var(--fatal); border-color: var(--fatal); color: #fff; }
+  .finding.fatal .tag .mark { color: #fff; }
+  .finding h3 { margin-bottom: 8px; }
+  .finding p { font-size: 15.5px; max-width: 66ch; }
+  .anchor {
+    margin-top: 12px; padding-left: 14px;
+    border-left: 2px solid var(--hairline);
+    font-size: 14.5px; font-style: italic; color: var(--ink-2);
+    max-width: 62ch;
+  }
+  .anchor .src { display: block; margin-top: 5px; font: 400 11.5px/1 var(--mono); font-style: normal; color: var(--ink-3); }
+
+  /* ============ steelman ============ */
+  .re { font: 700 12px/1 var(--sans); color: var(--ink-3); letter-spacing: 0.04em; margin-right: 6px; }
+  .repair {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 700 10px/1 var(--sans); letter-spacing: 0.1em; text-transform: uppercase;
+    border-radius: 999px; padding: 5px 10px; vertical-align: 1px;
+    background: color-mix(in srgb, var(--caution) 16%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--caution) 55%, transparent);
+    color: var(--ink);
+  }
+  .kernel { border-left-color: var(--good); }
+  .kernel .eyebrow { color: var(--good-text); }
+
+  /* ============ verdict section ============ */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--ring);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    break-inside: avoid;
+  }
+  .callout .eyebrow { display: block; margin-bottom: 10px; }
+  .callout p, .callout li { font-size: 15.5px; }
+  .callout ul, .callout ol { margin-left: 18px; }
+  .callout li + li { margin-top: 8px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-family: var(--sans); break-inside: avoid; }
+  th { font: 600 10.5px/1.3 var(--sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); text-align: left; padding: 0 14px 9px 0; border-bottom: 1px solid var(--hairline); }
+  td { font-size: 14px; line-height: 1.55; padding: 11px 14px 11px 0; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  td:first-child { white-space: nowrap; font-weight: 650; }
+
+  /* ============ footer ============ */
+  footer { margin-top: 80px; padding-top: 18px; border-top: 1px solid var(--hairline); font: 400 12.5px/1.7 var(--sans); color: var(--ink-3); }
+
+  /* ============ print ============ */
+  @page { margin: 16mm; }
+  @media print {
+    body { background: #fff; font-size: 12.5pt; }
+    .wrap { max-width: none; padding: 0; }
+    .banner, .tile, .finding, .callout, .box { break-inside: avoid; }
+    section { margin-top: 44px; }
+    a { text-decoration: none; }
+  }
+  @media (max-width: 640px) {
+    .meta, .stats { grid-template-columns: repeat(2, 1fr); }
+    .wrap { padding: 44px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= MASTHEAD ================= -->
+  <header>
+    <span class="eyebrow">Idea Crucible · Evaluation Report</span>
+    <h1>{{IDEA_TITLE}}</h1>
+    <p class="subtitle">{{ONE_SENTENCE_DESCRIPTION_OF_THE_IDEA}}</p>
+    <dl class="meta">
+      <div><dt>Date</dt><dd>{{DATE}}</dd></div>
+      <div><dt>Evaluator</dt><dd>{{EVALUATOR}}</dd></div>
+      <div><dt>Source material</dt><dd>{{SOURCES}}</dd></div>
+      <div><dt>Method</dt><dd>Three-pass adversarial protocol (critique · steelman · verdict)</dd></div>
+    </dl>
+  </header>
+
+  <!-- ================= VERDICT BANNER (the board reads this first) ================= -->
+  <div class="banner" style="--verdict: {{VERDICT_COLOR_VAR}};">
+    <span class="eyebrow">Recommendation</span>
+    <div class="word">{{RECOMMENDATION}}</div>
+    <p class="why">{{ONE_SENTENCE_RATIONALE}}</p>
+    <div class="scale">
+      <!-- mark exactly one chip active -->
+      <span class="chip">Pursue</span>
+      <span class="chip">Pursue with changes</span>
+      <span class="chip active">Test first</span>
+      <span class="chip">Park</span>
+      <span class="chip">Kill</span>
+    </div>
+    <p class="confidence"><b>Confidence: {{HIGH_MEDIUM_LOW}}.</b> {{WHAT_WOULD_FLIP_IT_ONE_LINE}}</p>
+  </div>
+
+  <div class="stats">
+    <div class="tile"><span class="label"><span class="mark fatal">▮</span> Fatal findings</span><div class="value">{{N}}</div><div class="note">fails regardless of execution</div></div>
+    <div class="tile"><span class="label"><span class="mark serious">▲</span> Serious findings</span><div class="value">{{N}}</div><div class="note">needs an answer first</div></div>
+    <div class="tile"><span class="label"><span class="mark friction">●</span> Friction findings</span><div class="value">{{N}}</div><div class="note">raises cost, not the verdict</div></div>
+    <div class="tile"><span class="label">Open questions</span><div class="value">{{N}}</div><div class="note">ranked by verdict impact</div></div>
+  </div>
+
+  <!-- ================= 01 · THE IDEA ================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><h2>The idea as I understand it</h2></div>
+    <p class="lede">{{RESTATEMENT — 2–4 sentences: what it proposes, what outcome it promises, what it implicitly assumes. All findings below target THIS restatement.}}</p>
+    <!-- include only if input was thin -->
+    <div class="box">
+      <span class="eyebrow">Assumptions forced by the material</span>
+      <ul>
+        <li>{{ASSUMPTION}}</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= 02 · CRITIQUE ================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><h2>Critique</h2><span class="sec-sub">Pass 1 · Adversarial</span></div>
+    <p>{{ONE_SHORT_FRAMING_PARAGRAPH — name the strongest single objection up front.}}</p>
+
+    <!-- repeat per finding, ordered FATAL → SERIOUS → FRICTION -->
+    <article class="finding fatal">
+      <div class="f-head"><span class="fid">F1</span><span class="tag"><span class="mark">▮</span>Fatal</span></div>
+      <h3>{{FINDING_TITLE}}</h3>
+      <p>{{FINDING_BODY — 60–120 words, specific, tied to the material.}}</p>
+      <div class="anchor">“{{QUOTE_OR_PARAPHRASE_FROM_SOURCE}}”<span class="src">{{source.md · §2, p.4, or file:line}}</span></div>
+    </article>
+
+    <article class="finding serious">
+      <div class="f-head"><span class="fid">F2</span><span class="tag"><span class="mark serious">▲</span>Serious</span></div>
+      <h3>{{FINDING_TITLE}}</h3>
+      <p>{{FINDING_BODY}}</p>
+      <div class="anchor">“{{QUOTE}}”<span class="src">{{source}}</span></div>
+    </article>
+
+    <article class="finding friction">
+      <div class="f-head"><span class="fid">F3</span><span class="tag"><span class="mark friction">●</span>Friction</span></div>
+      <h3>{{FINDING_TITLE}}</h3>
+      <p>{{FINDING_BODY}}</p>
+      <div class="anchor">“{{QUOTE}}”<span class="src">{{source}}</span></div>
+    </article>
+  </section>
+
+  <!-- ================= 03 · STEELMAN ================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><h2>Steelman</h2><span class="sec-sub">Pass 2 · Strongest case</span></div>
+    <div class="prose">
+      <h3>Why this, why now</h3>
+      <p>{{...}}</p>
+      <h3 style="margin-top:24px">What it looks like when it works</h3>
+      <p>{{...}}</p>
+      <h3 style="margin-top:24px">Answers to the critique</h3>
+      <p><span class="re">Re F1 —</span>{{REBUTTAL. If it only holds with an amendment, mark it:}} <span class="repair">Repair</span> {{and state the modification explicitly.}}</p>
+      <p><span class="re">Re F2 —</span>{{...}}</p>
+    </div>
+    <article class="finding kernel" style="margin-top:24px">
+      <span class="eyebrow">The kernel worth keeping</span>
+      <p style="margin-top:8px">{{EVEN_IF_THE_WHOLE_FAILS_THIS_PART_SURVIVES}}</p>
+    </article>
+  </section>
+
+  <!-- ================= 04 · VERDICT ================= -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Honest verdict</h2><span class="sec-sub">Pass 3 · Position taken</span></div>
+    <p class="lede">{{WHERE_THE_TRUTH_SITS — for each major critique/steelman tension, which side wins and why.}}</p>
+
+    <div class="callout"><span class="eyebrow">Deserves attention</span><ul><li>{{...}}</li></ul></div>
+    <div class="callout"><span class="eyebrow">Does not</span><ul><li>{{...}}</li></ul></div>
+    <div class="callout"><span class="eyebrow">The risks that matter</span><ul><li>{{2–3_ONLY}}</li></ul></div>
+    <div class="callout"><span class="eyebrow">Realism check</span><p>{{IS_THE_PROMISE_ACHIEVABLE_BY_THESE_MEANS — if not, the honest version of the promise.}}</p></div>
+
+    <div class="banner" style="--verdict: {{VERDICT_COLOR_VAR}}; margin-top:28px">
+      <span class="eyebrow">Recommendation — restated</span>
+      <div class="word" style="font-size:24px">{{RECOMMENDATION}}</div>
+      <p class="why">{{THE_FULL_RATIONALE_AND_FOR_TEST_FIRST_THE_CHEAPEST_DECISIVE_TEST}}</p>
+    </div>
+
+    <h3 style="margin-top:32px">Tripwires — what would flip this call</h3>
+    <table>
+      <thead><tr><th>ID</th><th>Signal</th><th>Flips the call to</th></tr></thead>
+      <tbody>
+        <tr><td>T1</td><td>{{OBSERVABLE_EVIDENCE_OR_EVENT}}</td><td>{{NEW_CALL}}</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:32px">Open questions for the author</h3>
+    <table>
+      <thead><tr><th>#</th><th>Question</th><th>Why it moves the verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Q1</td><td>{{QUESTION}}</td><td>{{IMPACT}}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Prepared with the <strong>Idea Crucible</strong> three-pass protocol — fierce critique, genuine steelman, honest verdict.
+    Findings are anchored to the source material cited above; severity is marked by word and shape, never color alone.
+    · <a href="https://github.com/liquid1982/agent-skills">liquid1982/agent-skills</a>
+  </footer>
+
+</div>
+</body>
+</html>
