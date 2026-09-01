@@ -1,9 +1,9 @@
 ---
-name: agent-fleet
+name: vm-fleet
 description: "Distribute independent agent work across active machines through Herdr, with one isolated Git worktree per lane and a configurable agent harness. Use when a user asks to parallelize work across a VM fleet, balance agent tasks across machines, or coordinate several remote coding sessions. Do not use for machine provisioning or routine single-agent work."
 ---
 
-# /agent-fleet — parallel agent work across machines
+# /vm-fleet — parallel agent work across machines
 
 Read [PROMPT.md](PROMPT.md) in full. Follow its allocation, dispatch, monitoring, and safety rules.
 
@@ -12,9 +12,9 @@ The protocol uses Herdr as the session layer. The agent harness can be Claude Co
 ## Usage
 
 ```text
-/agent-fleet <task>
-/agent-fleet --harness codex <task>
-/agent-fleet --workers 3 <task>
+/vm-fleet <task>
+/vm-fleet --harness codex <task>
+/vm-fleet --workers 3 <task>
 ```
 
 Treat these flags as intent, not as a fixed parser. Use equivalent natural-language instructions when the harness does not support slash-command arguments.

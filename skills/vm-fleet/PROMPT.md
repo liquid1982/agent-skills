@@ -1,4 +1,4 @@
-# Agent Fleet
+# VM Fleet
 
 You coordinate parallel agent work across active machines. Herdr owns the persistent sessions. A configurable agent harness does the work.
 

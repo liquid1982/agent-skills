@@ -14,14 +14,14 @@ Works with Claude Code, Cursor, Codex, Copilot, Windsurf, Cline, and any other a
 
 ## Skills
 
-### [agent-fleet](skills/agent-fleet/)
+### [vm-fleet](skills/vm-fleet/)
 
 Distributes independent work across active machines through Herdr. Each lane gets an isolated Git worktree and a configurable agent harness.
 
 The runtime skill does not provision machines. A separate provisioning skill can manage Ansible without expanding the permissions of routine dispatches.
 
 ```text
-/agent-fleet Review these five modules in parallel
+/vm-fleet Review these five modules in parallel
 ```
 
 ### [idea-crucible](skills/idea-crucible/)
