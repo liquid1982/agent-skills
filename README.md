@@ -14,11 +14,19 @@ Works with Claude Code, Cursor, Codex, Copilot, Windsurf, Cline, and any other a
 
 ## Skills
 
+### [vm-fleet-provision](skills/vm-fleet-provision/)
+
+Creates and provisions an OrbStack development fleet from macOS. It generates an inspectable shell-based project, then creates one clean template and five workers.
+
+```text
+/vm-fleet-provision Create my local development fleet
+```
+
 ### [vm-fleet](skills/vm-fleet/)
 
 Distributes independent work across active machines through Herdr. Each lane gets an isolated Git worktree and a configurable agent harness.
 
-The runtime skill does not provision machines. A separate provisioning skill can manage Ansible without expanding the permissions of routine dispatches.
+The runtime skill does not provision machines. Use `vm-fleet-provision` for setup and software synchronization.
 
 ```text
 /vm-fleet Review these five modules in parallel

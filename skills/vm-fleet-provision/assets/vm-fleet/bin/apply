@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+config="$project_root/config/fleet.sh"
+skills_manifest="$project_root/config/skills.txt"
+
+[[ -f "$config" ]] || { echo "Missing configuration: $config" >&2; exit 1; }
+# shellcheck source=/dev/null
+source "$config"
+
+: "${FLEET_IMAGE:?Set FLEET_IMAGE in config/fleet.sh}"
+: "${FLEET_TEMPLATE:?Set FLEET_TEMPLATE in config/fleet.sh}"
+: "${FLEET_HOST_SKILLS_ROOT:?Set FLEET_HOST_SKILLS_ROOT in config/fleet.sh}"
+((${#FLEET_WORKERS[@]})) || { echo "FLEET_WORKERS is empty" >&2; exit 1; }
+((${#FLEET_PROVISIONERS[@]})) || { echo "FLEET_PROVISIONERS is empty" >&2; exit 1; }
+
+usage() {
+  cat <<'USAGE'
+Usage: ./bin/apply [plan|apply|verify] [--yes]
+
+  plan    Show all configured actions without changing machines.
+  apply   Create missing machines and synchronize managed software.
+  verify  Test SSH and report managed software versions.
+
+The default command is plan. Use --yes to skip the apply confirmation.
+USAGE
+}
+
+action="${1:-plan}"
+assume_yes=0
+if (($#)); then shift; fi
+
+while (($#)); do
+  case "$1" in
+    --yes) assume_yes=1 ;;
+    -h | --help) usage; exit 0 ;;
+    *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
+  esac
+  shift
+done
+
+case "$action" in
+  plan | apply | verify) ;;
+  -h | --help) usage; exit 0 ;;
+  *) echo "Unknown action: $action" >&2; usage >&2; exit 2 ;;
+esac
+
+require_command() {
+  command -v "$1" >/dev/null 2>&1 || {
+    echo "Missing host command: $1" >&2
+    exit 1
+  }
+}
+
+validate_name() {
+  [[ "$1" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
+    echo "Invalid machine name: $1" >&2
+    exit 1
+  }
+}
+
+validate_config() {
+  local worker provisioner provision_file i j
+  validate_name "$FLEET_TEMPLATE"
+  for worker in "${FLEET_WORKERS[@]}"; do
+    validate_name "$worker"
+    [[ "$worker" != "$FLEET_TEMPLATE" ]] || {
+      echo "A worker cannot have the template name: $worker" >&2
+      exit 1
+    }
+  done
+  for ((i = 0; i < ${#FLEET_WORKERS[@]}; i++)); do
+    for ((j = i + 1; j < ${#FLEET_WORKERS[@]}; j++)); do
+      [[ "${FLEET_WORKERS[$i]}" != "${FLEET_WORKERS[$j]}" ]] || {
+        echo "Duplicate worker name: ${FLEET_WORKERS[$i]}" >&2
+        exit 1
+      }
+    done
+  done
+  for provisioner in "${FLEET_PROVISIONERS[@]}"; do
+    [[ "$provisioner" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
+      echo "Invalid provisioner name: $provisioner" >&2
+      exit 1
+    }
+    provision_file="$project_root/provision/$provisioner.sh"
+    [[ -f "$provision_file" ]] || {
+      echo "Missing provisioner: $provision_file" >&2
+      exit 1
+    }
+  done
+}
+
+orb_running() {
+  orb status >/dev/null 2>&1
+}
+
+machine_exists() {
+  orb info "$1" >/dev/null 2>&1
+}
+
+machine_state() {
+  if ! orb_running; then
+    echo "unknown (OrbStack is stopped)"
+  elif machine_exists "$1"; then
+    echo "existing; managed packages will be updated"
+  else
+    echo "missing; will be created"
+  fi
+}
+
+plan() {
+  local worker
+  echo "Project:      $project_root"
+  echo "Image:        $FLEET_IMAGE"
+  echo "Template:     $FLEET_TEMPLATE ($(machine_state "$FLEET_TEMPLATE"))"
+  echo "Workers:"
+  for worker in "${FLEET_WORKERS[@]}"; do
+    printf '  %-20s %s\n' "$worker" "$(machine_state "$worker")"
+  done
+  echo "Provisioners: ${FLEET_PROVISIONERS[*]}"
+  echo "Host skills:  $FLEET_HOST_SKILLS_ROOT"
+  echo "Credentials:  not managed; authenticate each worker after provisioning"
+  echo "Template end state: stopped"
+}
+
+ensure_orbstack() {
+  local attempt
+  if orb_running; then
+    return
+  fi
+  echo "Starting OrbStack"
+  orb start
+  for attempt in {1..30}; do
+    orb_running && return
+    sleep 1
+  done
+  echo "OrbStack did not become ready within 30 seconds." >&2
+  exit 1
+}
+
+run_provisioner() {
+  local machine="$1"
+  local provisioner="$2"
+  local provision_file="$project_root/provision/$provisioner.sh"
+  echo "  $provisioner"
+  if [[ "$provisioner" == "skills" ]]; then
+    orb -m "$machine" bash -s -- "$FLEET_HOST_SKILLS_ROOT" "$skills_manifest" < "$provision_file"
+  else
+    orb -m "$machine" bash -s < "$provision_file"
+  fi
+}
+
+provision_machine() {
+  local machine="$1"
+  local provisioner
+  echo "Provisioning $machine"
+  for provisioner in "${FLEET_PROVISIONERS[@]}"; do
+    run_provisioner "$machine" "$provisioner"
+  done
+}
+
+verification_script() {
+  local provisioner
+  echo "set -eu"
+  for provisioner in "${FLEET_PROVISIONERS[@]}"; do
+    case "$provisioner" in
+      git) echo "git --version" ;;
+      mise) echo '"$HOME/.local/bin/mise" --version' ;;
+      skills) echo 'test -d "$HOME/.agents/skills" && echo "skills links ready"' ;;
+      herdr) echo '"$HOME/.local/bin/herdr" --version' ;;
+      opencode) echo 'printf "opencode "; "$HOME/.local/bin/opencode" --version' ;;
+      codex) echo '"$HOME/.local/bin/codex" --version' ;;
+      claude) echo '"$HOME/.local/bin/claude" --version' ;;
+      grok) echo '"$HOME/.local/bin/grok" --version' ;;
+      pi) echo '"$HOME/.local/bin/pi" --version' ;;
+    esac
+  done
+}
+
+verify() {
+  local machine versions remote_script
+  remote_script="$(verification_script)"
+  echo "Testing SSH access and managed software"
+  for machine in "${FLEET_WORKERS[@]}"; do
+    versions="$(ssh -o BatchMode=yes -o ConnectTimeout=10 "$machine@orb" "$remote_script")"
+    printf '%-20s %s\n' "$machine" "${versions//$'\n'/, }"
+  done
+}
+
+require_command orb
+require_command ssh
+validate_config
+
+case "$action" in
+  plan)
+    plan
+    ;;
+  verify)
+    ensure_orbstack
+    verify
+    ;;
+  apply)
+    ensure_orbstack
+    plan
+    if (( ! assume_yes )); then
+      if [[ ! -t 0 ]]; then
+        echo "Apply needs an interactive confirmation or --yes." >&2
+        exit 1
+      fi
+      printf '\nCreate missing machines and update managed packages? [y/N] '
+      read -r answer
+      [[ "$answer" == "y" || "$answer" == "Y" ]] || { echo "Cancelled."; exit 0; }
+    fi
+    trap 'orb stop "$FLEET_TEMPLATE" >/dev/null 2>&1 || true' EXIT
+
+    if ! machine_exists "$FLEET_TEMPLATE"; then
+      echo "Creating $FLEET_TEMPLATE"
+      orb create "$FLEET_IMAGE" "$FLEET_TEMPLATE"
+    fi
+    provision_machine "$FLEET_TEMPLATE"
+
+    for machine in "${FLEET_WORKERS[@]}"; do
+      if ! machine_exists "$machine"; then
+        echo "Cloning $FLEET_TEMPLATE to $machine"
+        orb clone "$FLEET_TEMPLATE" "$machine"
+      fi
+      provision_machine "$machine"
+    done
+
+    verify
+    orb stop "$FLEET_TEMPLATE"
+    trap - EXIT
+    echo "Fleet is ready. Connect with: ssh MACHINE@orb"
+    ;;
+esac
