@@ -31,6 +31,6 @@ Evaluate an idea using the protocol in [PROMPT.md](PROMPT.md) (same directory as
 
 ## Rules
 
-- Do NOT spawn subagents, creator-critic loops, or other orchestration for this — the adversarial structure is inside the prompt itself. One pass, done well.
+- Run this as a single pass, without subagents or creator-critic loops: the adversarial structure is inside the prompt itself.
 - Do not soften the critique or the verdict because the author may be the user. The value of this skill is that it doesn't flatter.
 - If the user supplies extra context ("we already have budget", "assume the team is 2 people"), treat it as part of the idea's material — it constrains the critique and the verdict.

@@ -28,7 +28,7 @@ Document order (deliberately different from analysis order — decision-makers r
 - **Severity is never color-alone.** The word (FATAL/SERIOUS/FRICTION) and the shape mark (▮ / ▲ / ●) always accompany the color — the template does this; keep it intact for colorblind readers and grayscale print.
 - **Verdict color mapping:** PURSUE and PURSUE WITH CHANGES → `var(--good)` · TEST FIRST → `var(--caution)` · PARK → `var(--friction)` · KILL → `var(--fatal)`. Set it via the `--verdict` style on both banners; both must match, and the active chip must match the recommendation text.
 - **Numbers and values stay in ink** (`--ink`), never tinted with a status color — the tag and mark carry severity, the text stays neutral and legible.
-- **Prose discipline.** Finding bodies 60–120 words; callout bullets one sentence each; no filler sections. An empty section (e.g., zero FATAL findings) is stated in one line ("No fatal findings."), not padded.
+- **Prose discipline.** A finding body is one tight paragraph — the anchor, the mechanism, the consequence — written for a reader who skims cards in a boardroom. Callout bullets are one sentence each; no filler sections. An empty section (e.g., zero FATAL findings) is stated in one line ("No fatal findings."), not padded.
 - **File naming:** `<kebab-slug-of-idea>-crucible.html`, written next to the source material when the input was files, otherwise in the working directory.
 
 ## Pre-delivery checklist

@@ -41,7 +41,7 @@ Trust prompts need user authorization, but batch the ask. When every lane will s
 
 ## Worker discovery
 
-Use the fleet manager that the environment provides. For example, use OrbStack for local VMs or SSH for remote hosts.
+Use the fleet manager that the environment provides. For example, use OrbStack for local VMs or SSH for remote hosts. `orb -m <vm>` reads stdin, so a shell loop that calls it runs once; redirect stdin from `/dev/null` on each call.
 
 An eligible worker meets all these conditions:
 
@@ -103,7 +103,9 @@ Reset the harness context between queue items: send the harness's clear command 
 
 Attach to the Herdr session on each selected worker. Start the selected harness in the assigned worktree when it is not already ready there.
 
-Clear the pane's input line (send `esc`) before sending a prompt. Never assume the input box is empty: another client can have typed into it.
+When the harness is already running, clear its input box (send `esc`) before you send a prompt: another client can have typed into it. Do not send `esc` before `pane run` into a shell. Bash readline treats ESC as a meta prefix and swallows the start of Herdr's bracketed paste, so the command never runs and `pane run` still exits 0.
+
+After `pane run`, confirm that the harness started with `herdr pane process-info --pane <id>`. `pane run` prints nothing and exits 0 even when the command did not start.
 
 Keep the pane prompt to one line. Put the full task packet in a file the lane can read, and send one line that points at it. Multi-line text through raw pane input submits early or garbles.
 
@@ -164,6 +166,4 @@ If the user requests cleanup, remove only resources that this run created. Do no
 
 ## Provisioning boundary
 
-Infrastructure convergence is a separate workflow. An Ansible skill can install packages, configure Herdr, and validate workers.
-
-This runtime protocol only consumes eligible workers. It never invokes Ansible automatically.
+Infrastructure convergence is a separate workflow: `vm-fleet-provision` creates, repairs, and verifies workers. This runtime protocol only consumes eligible workers. It never provisions.
