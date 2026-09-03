@@ -32,6 +32,15 @@ The runtime skill does not provision machines. Use `vm-fleet-provision` for setu
 /vm-fleet Review these five modules in parallel
 ```
 
+### [scifi](skills/scifi/)
+
+Turns the current [Herdr](https://herdr.dev) tab into a movie-style hacker terminal wall: 10 panes split around the calling pane, showing matrix rain, a radar sweep, a scrolling hex dump, a fake intrusion log, a SHA-256 "cracker", satellite telemetry, a block clock, plus real data from `btop`, the system log and the live TCP socket table. Every effect redraws to the pane size, so panes can be resized or moved. Pure bash and python3, no dependencies beyond `herdr` and `jq`.
+
+```text
+/scifi                         # build the wall
+scripts/scifi up|down|status   # same thing from a shell, any agent or none
+```
+
 ### [idea-crucible](skills/idea-crucible/)
 
 Puts any idea or proposal through a three-pass evaluation:
@@ -55,7 +64,7 @@ No agent? Paste [`skills/idea-crucible/PROMPT.md`](skills/idea-crucible/PROMPT.m
 Each skill follows the same shape:
 
 - `skills/<name>/SKILL.md` — thin agent wrapper: name/description frontmatter, intake and output rules.
-- `skills/<name>/PROMPT.md` — the model-agnostic protocol, single source of truth.
+- `skills/<name>/PROMPT.md` — the model-agnostic protocol, single source of truth (or `scripts/` when the skill is executable, like `scifi`).
 - `skills/<name>/REPORT.md` + `TEMPLATE.html` (where applicable) — the rendered-deliverable spec and its design template.
 
 ## License

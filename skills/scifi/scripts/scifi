@@ -1,0 +1,13 @@
+#!/bin/bash
+# Single entry point: scifi up | down | status   (works for humans and any agent)
+set -uo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+case "${1:-}" in
+  up|launch)    exec bash "$HERE/launch.sh" "${@:2}" ;;
+  down|teardown) exec bash "$HERE/teardown.sh" "${@:2}" ;;
+  status)
+    d="${XDG_CACHE_HOME:-$HOME/.cache}/scifi"
+    if ls "$d"/*.ids >/dev/null 2>&1; then for f in "$d"/*.ids; do a=$(basename "$f" .ids); echo "anchor ${a//_/:}: $(wc -l < "$f" | tr -d ' ') panes"; done
+    else echo "scifi: not running"; fi ;;
+  *) echo "usage: scifi up|down|status [anchor-pane-id]"; exit 2 ;;
+esac
